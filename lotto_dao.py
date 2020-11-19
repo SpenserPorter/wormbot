@@ -15,7 +15,7 @@ class LottoryConnection(object):
             self.connection = psycopg2.connect(user=self.username,
                                                 password=self.password,
                                                 host=self.host,
-                                                port=selfport,
+                                                port=self.port,
                                                 database=self.dbname
                                                 )
         except(Exception, psycopg2.Error) as error:
