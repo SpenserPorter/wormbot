@@ -30,8 +30,10 @@ def build_embed(embed_input_dict):
     return embed
 
 def format_winning_tickets(ticket_result_list):
+    outstring=""
     for ticket_result in ticket_result_list:
-        "Ticket {} won {} worms!".format(ticket_result[0],ticket_result[1])
+        outstring+="Ticket {} won you {} worms! ".format(Ticket(ticket_result[0]), ticket_result[1])
+    return outstring
 
 
 class Ticket(object):
@@ -232,10 +234,10 @@ class Lottery(commands.Cog):
                 winning_tickets = result[2]
                 user = await self.bot.fetch_user(user_id)
                 embed_dict['fields'][user_id] = {'name': user.name, 'value': "Won a total of {:,} on {:,} winning tickers!".format(balance_modifier, len(winning_tickets)), 'inline': False}
-                await user.send("Lottory {} Results: You won {:,}. Your new balance is {:,}.".format(lottory_id, balance_modifier, new_user_balance))
+                await user.send("Lottory {} Results: You won {:,} worms! Your new balance is {:,} worms.".format(lottory_id, balance_modifier, new_user_balance))
                 if len(winning_tickets) < 100:
                     for n in range(0, len(winning_tickets), 50):
-                        await user.send("Your winnings tickets for Lottory {}: Winning Numbers:{} Your winning tickets: {}".format(lottory_id, winning_numbers, winning_tickets[n:n+50]))
+                        await user.send("Lottery {} winning numbers: {}. Your winning tickets: {}".format(lottory_id, winning_numbers, format_winning_tickets(winning_tickets[n:n+50])))
                 await lottory_message.edit(embed=build_embed(embed_dict))
 
         income = ticket_cost * num_tickets
@@ -272,7 +274,7 @@ class Lottery(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=['buy_tickets', 'bt'])
     async def buy_ticket(self, ctx, first: int, second: int, third: int, fourth: int, mega: int):
         """
-        Purchase a lottory ticket, enter all 5 numbers seperated by spaces.
+        Purchase a lottory ticket, enter all 5 numbers seperated by spaces. Valid tickets must have first 4 numbes between 1-23, and last number between 1-11.
         """
         lottory_id = db.get_current_lottory()
         user_balance = db.get_user_balance(ctx.author.id)
@@ -340,7 +342,7 @@ class Lottery(commands.Cog):
 
                 else:
                     for n in range(0, len(ticket_list), 50):
-                        await ctx.author.send("Lottory {} Quickpick tickets {}".format(lottory_id, ticket_list[n:n+50]))
+                        await ctx.author.send("Lottory {} Quickpick tickets {}".format(lottory_id, ticket_object_list[n:n+50]))
 
                 await ctx.send("{} spent {:,} on {:,} tickets, new balance is {:,}. The jackpot is now {:,}".format(ctx.author.name, total_cost, number_of_tickets, round(new_balance,2), payout_table[True][4]+new_progressive))
 

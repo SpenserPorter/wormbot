@@ -9,12 +9,13 @@ class LottoryConnection(object):
         self.password="lolwut"
         self.dbname="wormbot"
 
+
     def __enter__(self):
         try:
             self.connection = psycopg2.connect(user=self.username,
                                                 password=self.password,
                                                 host=self.host,
-                                                port=self.port,
+                                                port=selfport,
                                                 database=self.dbname
                                                 )
         except(Exception, psycopg2.Error) as error:

@@ -111,6 +111,8 @@ class Roulette(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def roulette(self, ctx, amount:int, *spaces):
+        '''Plays a game of worm roulette. Add bets by type !roulette <amount> <space>'''
+        
         user_id = ctx.author.id
         balance = db.get_user_balance(user_id)
         #Validate user balance is sufficient and space is valid

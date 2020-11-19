@@ -82,11 +82,13 @@ class WormFight(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.cock_price = 1
+        self.cock_price = int(db.get_config("cock_price"))
         self.cock_battle = None
 
     @commands.group(invoke_without_command=True, aliases=["wf"])
     async def wormfight(self, ctx, amount:int):
+        '''Test your worm in a fight to the death, each win increases your worms toughness and odds of winning!'''
+
         user_id = ctx.author.id
         balance = db.get_user_balance(user_id)
         cock_status = db.get_cock_status(user_id)
@@ -129,6 +131,7 @@ class WormFight(commands.Cog):
 
     @commands.group(invoke_without_commands=True, aliases=["cb"])
     async def wormbattle(self, ctx, user_string: str, purse=0):
+        '''Challenge another users worm to a battle to the death, anyone can bet on the outcome'''
 
         if purse > db.get_user_balance(ctx.author.id):
             ctx.send("You don't have {} worms!".format(purse))
@@ -228,6 +231,7 @@ class WormFight(commands.Cog):
 
     @commands.group(aliases=["ca"])
     async def challenge_accepted(self, ctx):
+        '''Accept a wormbattle challenge'''
         if self.cock_battle is not None:
             if ctx.author == self.cock_battle.challenged:
                 if self.cock_battle.accepted == True:
@@ -239,6 +243,8 @@ class WormFight(commands.Cog):
 
     @commands.group(aliases=["bb"])
     async def battlebet(self, ctx, amount: int, user_string: str):
+        '''Bet on the current wormbattle, !battlebet <amount> <user>'''
+
         if self.cock_battle is None:
             await ctx.send("There is no active worm battle")
             return
@@ -272,6 +278,7 @@ class WormFight(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=["pw","getready","buy_worm"])
     async def prepare_worm(self, ctx):
+        '''Buy a fight worm'''
         user_id = ctx.author.id
         balance = db.get_user_balance(user_id)
         cock_status = db.get_cock_status(user_id)

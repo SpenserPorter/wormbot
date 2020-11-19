@@ -26,7 +26,7 @@ class GeneralCommands(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=["lb"])
     async def leaderboard(self,ctx):
-        '''Displays user balance, battle worm status and number of tickets in current drawing'''
+        '''Displays worm balance leaderboard'''
 
         user_list = db.get_user()
         balances = []
