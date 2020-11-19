@@ -5,7 +5,7 @@ import asyncio
 import re
 from discord.ext import commands
 
-ticket_cost = db.get_config("lottery_ticket_cost")
+ticket_cost = int(db.get_config("lottery_ticket_cost"))
 
 #{Megaball:{num_matches:payout}}
 payout_table = {True:{0:0*ticket_cost, 1:3*ticket_cost, 2:10*ticket_cost, 3:150*ticket_cost, 4:15000*ticket_cost},
