@@ -44,7 +44,7 @@ class GeneralCommands(commands.Cog):
         output = []
 
         for user_name, cock_status, user_balance in sorted_balances:
-            cock_power = "{:.1f}% ".format((get_cock_power(cock_status) * 100)) if cock_status is not -1 else ""
+            cock_power = "{:.1f}% <:Worm:779117240087609404>".format((get_cock_power(cock_status) * 100)) if cock_status is not -1 else ":x:"
             output.append("{}: **{}** - {:,} - {}".format(rank, user_name, round(user_balance), cock_power))
             rank += 1
 
@@ -58,7 +58,7 @@ class GeneralCommands(commands.Cog):
         '''Adds worms to all non bot users balances'''
 
         if ctx.author.id != 154415714411741185: #My user.id
-            await ctx.send("You're not my real dad bitch!")
+            await ctx.send("You're not my real dad!")
             return
 
         user_id_list = db.get_user() #Returns a list of all users
@@ -69,7 +69,7 @@ class GeneralCommands(commands.Cog):
                 new_balance = db.modify_user_balance(user_id[0], amount)
                 await ctx.send('Added {:,} worms to {}\'s account. New balance is {:,}'.format(amount, user.name, new_balance))
 
-    @commands.group(invoke_without_command=True, aliases=["bal","balance"])
+    @commands.group(invoke_without_command=True, aliases=["bal","balance","worm"])
     async def worms(self,ctx):
         '''Shows your worm balance and number of tickets in next lottery'''
 

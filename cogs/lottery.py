@@ -274,7 +274,9 @@ class Lottery(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=['buy_tickets', 'bt'])
     async def buy_ticket(self, ctx, first: int, second: int, third: int, fourth: int, mega: int):
         """
-        Purchase a lottory ticket, enter all 5 numbers seperated by spaces. Valid tickets must have first 4 numbes between 1-23, and last number between 1-11.
+        Purchase a lottory ticket, enter all 5 numbers seperated by spaces.
+        Valid tickets must have first 4 numbes between 1-23, and last number between 1-11.
+        Use !bt qp <number> to purchase a number of quickpick tickets. Good luck!
         """
         lottory_id = db.get_current_lottory()
         user_balance = db.get_user_balance(ctx.author.id)
@@ -342,7 +344,7 @@ class Lottery(commands.Cog):
 
                 else:
                     for n in range(0, len(ticket_list), 50):
-                        await ctx.author.send("Lottory {} Quickpick tickets {}".format(lottory_id, ticket_object_list[n:n+50]))
+                        await ctx.author.send("Lottory {} Quickpick tickets {}".format(lottory_id, ticket_obj_list[n:n+50]))
 
                 await ctx.send("{} spent {:,} on {:,} tickets, new balance is {:,}. The jackpot is now {:,}".format(ctx.author.name, total_cost, number_of_tickets, round(new_balance,2), payout_table[True][4]+new_progressive))
 

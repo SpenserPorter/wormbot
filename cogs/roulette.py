@@ -109,10 +109,11 @@ class Roulette(commands.Cog):
         self.bot = bot
         self.game = None
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=["Roulette"])
     async def roulette(self, ctx, amount:int, *spaces):
-        '''Plays a game of worm roulette. Add bets by type !roulette <amount> <space>'''
-        
+        '''Plays a game of worm roulette.
+        Add bets with !roulette <amount> <space>'''
+
         user_id = ctx.author.id
         balance = db.get_user_balance(user_id)
         #Validate user balance is sufficient and space is valid
@@ -162,7 +163,7 @@ class Roulette(commands.Cog):
             embed_dict = {'colour':discord.Colour(0x006400), 'author_name':new_game_string,
                           'fields': {},
                           }
-            embed_dict['fields'][0] = {'name': 'Type !Roulette <wager> <space> to bet!', 'value': '------------'}
+            embed_dict['fields'][0] = {'name': 'Type !roulette <wager> <space> to bet!', 'value': '------------'}
             embed_dict['fields'][ctx.author.id] = {'name': ctx.author.name, 'value': output_string.format(*spaces), 'inline': True}
             self.game = RouletteGame(self.bot, ctx)
             image_url = await self.game.add_wagers(user_id, amount, spaces)

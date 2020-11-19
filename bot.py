@@ -3,11 +3,17 @@ import datetime
 import logging
 from pathlib import Path
 import os
+import ast
 import discord
 import lotto_dao as db
 from discord.ext import commands
 
-client = discord.Client()
+worms = db.get_config("worm_emojis_list")
+worm_emoji_amount = int(db.get_config("worm_emoji_amount"))
+worm_roles_dict = ast.literal_eval(db.get_config("worm_roles_dict"))
+
+#worm_roles_dict={0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",9999999999999:"Magic Worm™ (5000+)"}
+#worm_roles_dict={0:"test1",100:"test2",999999999999999:"test3"}
 
 async def run():
     """
@@ -20,7 +26,6 @@ async def run():
         await bot.start(token)
     except KeyboardInterrupt:
         await bot.logout()
-
 
 class Bot(commands.Bot):
     def __init__(self, **kwargs):
@@ -68,6 +73,7 @@ class Bot(commands.Bot):
                 print(f'failed to load extension {error}')
             print('-' * 10)
         self.loop.create_task(self.add_all_users())
+        self.loop.create_task(self.update_worm_roles())
 
     async def on_ready(self):
         """
@@ -87,12 +93,49 @@ class Bot(commands.Bot):
         for user in self.users:
             db.add_user(user.id)
 
-    @client.event
-    async def on_member_join(member):
+    async def update_worm_roles(self):
+        while True:
+            user_list = db.get_user()
+            balances = []
+            for user_id in user_list:
+                user = await self.fetch_user(user_id[0])
+
+                if not user.bot:
+                    balance = db.get_user_balance(user.id)
+                    options=[]
+                    for key in worm_roles_dict:
+                        if balance < key:
+                            options.append(key)
+                    min_key = min(options)
+                    role_name = worm_roles_dict[min_key]
+                    guild = self.get_guild(459332259321741323)
+                    member = guild.get_member(user.id)
+                    current_roles = member.roles
+                    role_to_assign = discord.utils.get(member.guild.roles, name=role_name)
+                    if role_to_assign not in member.roles:
+                        for role in current_roles:
+                            if role.name in worm_roles_dict.values():
+                                await member.remove_roles(role)
+                                print("Removing {} from {}".format(role.name, member.name))
+                        print("Assigning {} to {}".format(role_to_assign.name, user.name))
+                        await member.add_roles(role_to_assign)
+
+            await asyncio.sleep(10)
+
+    async def on_member_join(self, member):
         db.add_user(member.id)
-        await member.dm_channel.send(
-            f'Hi {member.name}, welcome to the server! Type !help to see a list of all commands.'
-        )
+        channel = await member.create_dm()
+        await channel.send('Hi {}, welcome to the server! Type !help to see a list of all commands.'.format(member.name))
+
+    async def on_raw_reaction_add(self, payload):
+        key = await self.http.get_message(payload.channel_id, payload.message_id)
+        if (payload.emoji.name in worms):  # and payload.user_id != int(key["author"]["id"]) and 749486563691593740 != int(key["author"]["id"]):
+            db.modify_user_balance(payload.user_id, worm_emoji_amount)
+
+    async def on_raw_reaction_remove(self, payload):
+        key = await self.http.get_message(payload.channel_id, payload.message_id)
+        if (payload.emoji.name in worms) and payload.user_id != int(key["author"]["id"]):
+            db.modify_user_balance(payload.user_id, worm_emoji_amount * -1)
 
     async def on_message_edit(self, before, after):
         '''Prevent rigged accusations with extreme predjustice'''
@@ -112,7 +155,7 @@ class Bot(commands.Bot):
             return
         check_rigged = message.content.lower()
         if check_rigged.find("rigged") != -1:
-            await channel.send("It's not rigged")
+            await channel.send("NANI???")
         await self.process_commands(message)
 
 

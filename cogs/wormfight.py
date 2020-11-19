@@ -37,7 +37,7 @@ def build_embed(embed_input_dict):
         embed.add_field(name=field['name'], value=field['value'], inline=field['inline'] if 'inline' in field else False)
     return embed
 
-class WormBattle():
+class CockBattle():
 
     def __init__(self, bot, ctx, challenger, challenged, purse):
         self.bot = bot
@@ -87,7 +87,10 @@ class WormFight(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=["wf"])
     async def wormfight(self, ctx, amount:int):
-        '''Test your worm in a fight to the death, each win increases your worms toughness and odds of winning!'''
+        '''Test your worm in a fight to the death,
+         each win increases your worms toughness and odds of winning!
+         Buy a fightworm with !bw and then bet on the outcome of a fight
+         with !wf <amount>'''
 
         user_id = ctx.author.id
         balance = db.get_user_balance(user_id)
@@ -115,7 +118,7 @@ class WormFight(commands.Cog):
                 new_cock_status = cock_status + 1
                 new_balance = db.modify_user_balance(user_id, amount_won)
                 db.set_cock_status(user_id, new_cock_status)
-                result_msg = "Your lil worm made you {:,} richer".format(amount)
+                result_msg = "Your worm made you {:,} worms richer".format(amount)
                 hardness_msg= "Now at {:.1f}% toughness".format(get_cock_power(new_cock_status) * 100)
                 embed_dict = {'colour':discord.Colour(0x00e553), 'author_name':ctx.author.name,
                             'fields': {1:{'name': result_msg, 'value': hardness_msg}}}
@@ -123,14 +126,14 @@ class WormFight(commands.Cog):
                 await ctx.send(embed=build_embed(embed_dict))
             else:
                 db.set_cock_status(user_id, -1)
-                result_msg = "Your worm got smoosh <:sad:455866480454533120>"
+                result_msg = "Your worm got smoosh :("
                 embed_dict = {'colour':discord.Colour(0xe10531), 'author_name':ctx.author.name,
                             'fields': {1:{'name': 'Ouch', 'value': result_msg}}}
 
                 await ctx.send(embed=build_embed(embed_dict))
 
     @commands.group(invoke_without_commands=True, aliases=["cb"])
-    async def wormbattle(self, ctx, user_string: str, purse=0):
+    async def wormbattle(self, ctx, user, purse=0):
         '''Challenge another users worm to a battle to the death, anyone can bet on the outcome'''
 
         if purse > db.get_user_balance(ctx.author.id):
@@ -145,9 +148,9 @@ class WormFight(commands.Cog):
             return
 
         try:
-            challenged_user = match_string_to_user(self.bot, ctx, user_string)
+            challenged_user = ctx.message.mentions[0]
         except:
-            await ctx.send("No user found matching that name")
+            await ctx.send("You need to mention a user to challenge them!")
 
         if db.get_cock_status(challenged_user.id) == -1:
             await ctx.send("{} doesn't have a battleworm!".format(challenged_user.name))
@@ -160,9 +163,9 @@ class WormFight(commands.Cog):
         self.cock_battle = CockBattle(self.bot, ctx, ctx.author, challenged_user, purse=purse)
 
         embed_dict = {'colour':discord.Colour(0xffa500), 'author_name':"Worm Battle Challenge!",
-                      'fields': {1:{'name': self.cock_battle.challenger.name, 'value': "{:.1f}% <:peen:456499857759404035> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenger_cock_status)*100, 1/self.cock_battle.odds), 'inline': True},
+                      'fields': {1:{'name': self.cock_battle.challenger.name, 'value': "{:.1f}% <:Worm:779117240087609404> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenger_cock_status)*100, 1/self.cock_battle.odds), 'inline': True},
                                  2:{'name': "VS", 'value': '-', 'inline': True},
-                                 3:{'name': self.cock_battle.challenged.name, 'value': "{:.1f}% <:peen:456499857759404035> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenged_cock_status)*100, self.cock_battle.odds), 'inline': True},
+                                 3:{'name': self.cock_battle.challenged.name, 'value': "{:.1f}% <:Worm:779117240087609404> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenged_cock_status)*100, self.cock_battle.odds), 'inline': True},
                                  4:{'name': "```{} has 60s to accept the challenge!```".format(self.cock_battle.challenged.name), 'value': 'Use <$challenge_accepted> to accept!', 'inline': False}
                                  }
                       }
@@ -242,7 +245,7 @@ class WormFight(commands.Cog):
                 await ctx.send("Only {} can accept the challenge".format(self.cock_battle.challenged.name))
 
     @commands.group(aliases=["bb"])
-    async def battlebet(self, ctx, amount: int, user_string: str):
+    async def battlebet(self, ctx, amount: int, user):
         '''Bet on the current wormbattle, !battlebet <amount> <user>'''
 
         if self.cock_battle is None:
@@ -252,10 +255,13 @@ class WormFight(commands.Cog):
             await ctx.send("The battle has not been accepted by {} yet".format(self.cock_battle.challenged.name))
             return
         try:
-            player_to_bet_on = match_string_to_user(self.bot, ctx, user_string)
+            player_to_bet_on = ctx.message.mentions[0]
         except:
-            await ctx.send("No user found matching {}".format(user_string))
-            return
+            try:
+                player_to_bet_on = match_string_to_user(self.bot, ctx, user)
+            except:
+                await ctx.send("No user found matching {}".format(user_string))
+                return
         if player_to_bet_on in [self.cock_battle.challenger, self.cock_battle.challenged]:
             user_id = ctx.author.id
             balance = db.get_user_balance(user_id)
@@ -276,7 +282,7 @@ class WormFight(commands.Cog):
             await ctx.send("{} is not participating in the current battle you mook".format(player_to_bet_on))
             return
 
-    @commands.group(invoke_without_command=True, aliases=["pw","getready","buy_worm"])
+    @commands.group(invoke_without_command=True, aliases=["pw","buy","buy_worm"])
     async def prepare_worm(self, ctx):
         '''Buy a fight worm'''
         user_id = ctx.author.id
@@ -292,7 +298,7 @@ class WormFight(commands.Cog):
         else:
             db.modify_user_balance(user_id, -1 * self.cock_price)
             db.set_cock_status(user_id, 0)
-            await ctx.send("You paid {} for a battle worm!".format(self.cock_price))
+            await ctx.send("You exchanged {} worms for a rookie battle worm! Win fights and battles to level him up!".format(self.cock_price))
 
 def setup(bot):
     bot.add_cog(WormFight(bot))

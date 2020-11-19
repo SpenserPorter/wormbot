@@ -115,22 +115,16 @@ def get_user(user_id=None):
         curr.execute(get_user_sql)
         return curr.fetchall()
 
-
 def add_ticket_to_user(ticket_list, lottory_id, user_id):
     with LottoryConnection() as conn:
         batch_size = 100000
         curr=conn.cursor()
-        add_ticket_sql = 'INSERT INTO ticket (ticket_value, lottory_id, user_id) VALUES (%s,%s,%s)'
+        add_ticket_sql = 'INSERT INTO ticket (ticket_value, lottory_id, user_id) VALUES'
         for n in range(0, len(ticket_list), batch_size):
-            values_list = map(lambda x: (str(x), lottory_id, user_id), ticket_list[n:n+batch_size])
-            curr.executemany(add_ticket_sql, values_list)
+            values_list = list(map(lambda x: (str(x), lottory_id, user_id), ticket_list[n:n+batch_size]))
+            argument_string = ",".join(str(x) for x in values_list)
+            curr.execute("{}{}".format(add_ticket_sql, argument_string))
             conn.commit()
-        # curr=conn.cursor()
-        # add_ticket_sql = "INSERT INTO ticket (ticket_value, lottory_id, user_id) VALUES ('{}',{},{})"
-        # for ticket in ticket_list:
-        #     values = (str(ticket), lottory_id, user_id)
-        #     curr.execute(add_ticket_sql.format(*values))
-        #     conn.commit()
 
 def get_user_balance(user_id):
     with LottoryConnection() as conn:

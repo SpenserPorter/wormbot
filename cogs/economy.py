@@ -2,7 +2,12 @@ import discord
 import lotto_dao as db
 import asyncio
 import re
+import ast
+import random
 from discord.ext import commands
+
+thumb_gif_list = ast.literal_eval(db.get_config("thumb_gifs"))
+love_gif_list = ast.literal_eval(db.get_config("love_gifs"))
 
 def build_embed(embed_input_dict):
 
@@ -26,7 +31,7 @@ class Economy(commands.Cog):
     async def daily(self, ctx):
         "Does your daily check in - works every 24 hours"
         db.modify_user_balance(ctx.author.id, int(db.get_config("daily_worms")))
-        #await ctx.send(file=discord.File(daily_gif[random.randint(0, len(daily_gif) - 1)]))
+        await ctx.send(thumb_gif_list[random.randint(0, len(thumb_gif_list) - 1)])
         await ctx.send("You collected {} worms for today :D".format(db.get_config("daily_worms")))
 
 
@@ -37,6 +42,10 @@ class Economy(commands.Cog):
             await ctx.send(msg)
         else:
             raise error
+
+    @commands.group(invoke_without_command=True)
+    async def steal(self,ctx):
+        await ctx.send("You haven't learned that skill yet!")
 
     @commands.group(invoke_without_command=True)
     async def give(self,ctx,who,value):
@@ -59,6 +68,7 @@ class Economy(commands.Cog):
                 #give_gif
                 db.modify_user_balance(ctx.author.id, value * -1)
                 db.modify_user_balance(their_id, value)
+                await ctx.send(love_gif_list[random.randint(0, len(love_gif_list) - 1)])
                 await ctx.send("{} has sent {} worms to {}".format(message.author.mention, value, message.mentions[0].mention))
                 return
 
