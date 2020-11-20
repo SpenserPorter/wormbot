@@ -31,25 +31,25 @@ class GeneralCommands(commands.Cog):
         user_list = db.get_user()
         balances = []
 
-        for user_id in user_list:
-            user = await self.bot.fetch_user(user_id[0])
-
-            if not user.bot:
-                balance = db.get_user_balance(user.id)
-                cock_status = db.get_cock_status(user.id)
-                balances.append((user.name, cock_status, balance))
+        for user in user_list:
+            user_id = user[0]
+            balance = db.get_user_balance(user_id)
+            cock_status = db.get_cock_status(user_id)
+            balances.append((user_id, cock_status, balance))
 
         sorted_balances = sorted(balances, key=lambda balances: balances[2], reverse=True)
+        top_sorted_balances = sorted_balances[0:10]
         rank = 1
         output = []
 
-        for user_name, cock_status, user_balance in sorted_balances:
+        for user_id, cock_status, user_balance in top_sorted_balances:
+            user = await self.bot.fetch_user(user_id)
             cock_power = "{:.1f}% <:Worm:752975370231218178>".format((get_cock_power(cock_status) * 100)) if cock_status is not -1 else ":x:"
-            output.append("{}: **{}** - {:,} - {}".format(rank, user_name, round(user_balance), cock_power))
+            output.append("{}: **{}** - {:,} - {}".format(rank, user.name, round(user_balance), cock_power))
             rank += 1
 
         embed_dict = {'colour':discord.Colour(0x034cc1), 'author_name':"Worm Hall of Fame",
-                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output[0:10])}}}
+                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output)}}}
 
         await ctx.send(embed = build_embed(embed_dict))
 

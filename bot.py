@@ -8,13 +8,17 @@ import discord
 import lotto_dao as db
 from discord.ext import commands
 
-worms = db.get_config("worm_emojis_list")
+worm_emojis_list = db.get_config("worm_emojis_list")
 worm_emoji_amount = int(db.get_config("worm_emoji_amount"))
 worm_roles_dict = ast.literal_eval(db.get_config("worm_roles_dict"))
 guild_id = int(db.get_config("guild_id"))
+worm_god_id = int(db.get_config("worm_god_id"))
+default_channel = int(db.get_config("default_channel"))
 
 #worm_roles_dict={0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",9999999999999:"Magic Worm™ (5000+)"}
-#worm_roles_dict={0:"test1",100:"test2",999999999999999:"test3"}
+#################{0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",99999999999999:"Magic Worm™ (5000+)"}
+#worm_roles_dict={0:"test1",100:"test2","max":"god"}
+
 
 async def run():
     """
@@ -22,7 +26,7 @@ async def run():
     it's recommended that you create it here and pass it to the bot as a kwarg.
     """
     bot = Bot(description='Get ya worms here!')
-    token = os.getenv('WORM_BOT_TOKEN')
+    token = os.getenv('WORM_TEST_TOKEN')
     try:
         await bot.start(token)
     except KeyboardInterrupt:
@@ -96,31 +100,61 @@ class Bot(commands.Bot):
 
     async def update_worm_roles(self):
         await asyncio.sleep(15)
+        guild = self.get_guild(guild_id)
+        role_object_dict={}
+        worm_god = {"user": None, "score": 0}
+        for key, role_name in worm_roles_dict.items():
+            role_object = discord.utils.get(guild.roles, name=role_name)
+            role_object_dict[key] = role_object
         while True:
             user_list = db.get_user()
             balances = []
-            for user_id in user_list:
-                user = await self.fetch_user(user_id[0])
+            update_god = False
+            users = db.get_user()
 
-                if not user.bot:
-                    balance = db.get_user_balance(user.id)
-                    options=[]
-                    for key in worm_roles_dict:
-                        if balance <= key:
-                            options.append(key)
-                    min_key = min(options)
-                    role_name = worm_roles_dict[min_key]
-                    guild = self.get_guild(guild_id)
-                    member = guild.get_member(user.id)
-                    current_roles = member.roles
-                    role_to_assign = discord.utils.get(member.guild.roles, name=role_name)
-                    if role_to_assign not in member.roles:
-                        for role in current_roles:
-                            if role.name in worm_roles_dict.values():
-                                await member.remove_roles(role)
-                                print("Removing {} from {}".format(role.name, member.name))
-                        print("Assigning {} to {}".format(role_to_assign.name, user.name))
-                        await member.add_roles(role_to_assign)
+            for user_id_tuple in user_list:
+                user_id = user_id_tuple[0]
+                balance = db.get_user_balance(user_id)
+                balances.append((user_id,balance))
+                options=[]
+                for threshold in role_object_dict:
+                    if balance <= threshold:
+                        options.append(threshold)
+                min_threshold = min(options)
+                role_to_assign = role_object_dict[min_threshold]
+                member = guild.get_member(user_id)
+                current_roles = member.roles
+                if role_to_assign not in member.roles:
+                    for role in current_roles:
+                        if role in role_object_dict.values():
+                            await member.remove_roles(role)
+                            print("Removing {} from {}".format(role, member.name))
+                    print("Assigning {} to {}".format(role_to_assign, member.name))
+                    await member.add_roles(role_to_assign)
+
+            god_role_object = discord.utils.get(guild.roles, id=worm_god_id)
+            sorted_balances = sorted(balances, key=lambda balances: balances[1], reverse=True)
+            new_worm_god_user_id = sorted_balances[0][0]
+            new_worm_god_balance = sorted_balances[0][1]
+
+            if new_worm_god_balance != worm_god["score"]:
+                worm_god["score"] = new_worm_god_balance
+                new_role_name = "Worm God ({} Worms)".format(worm_god["score"])
+                await god_role_object.edit(name=new_role_name)
+
+            if new_worm_god_user_id != worm_god["user"]:
+                worm_god["user"] = new_worm_god_user_id
+                current_god = god_role_object.members
+                new_god = guild.get_member(worm_god["user"])
+                if current_god is not None:
+                    for god in current_god:
+                        if god.id != worm_god["user"]:
+                            await god.remove_roles(god_role_object)
+                            message = "{} has been dethroned, All hail the new Worm God {} with {} worms!".format(god.mention, new_god.mention, worm_god["score"])
+                            channel = guild.get_channel(default_channel)
+                            await channel.send(message)
+                await new_god.add_roles(god_role_object)
+
 
             await asyncio.sleep(60)
 
@@ -131,12 +165,12 @@ class Bot(commands.Bot):
 
     async def on_raw_reaction_add(self, payload):
         key = await self.http.get_message(payload.channel_id, payload.message_id)
-        if (payload.emoji.name in worms):  # and payload.user_id != int(key["author"]["id"]) and 749486563691593740 != int(key["author"]["id"]):
+        if (payload.emoji.name in worm_emojis_list):  # and payload.user_id != int(key["author"]["id"]) and 749486563691593740 != int(key["author"]["id"]):
             db.modify_user_balance(payload.user_id, worm_emoji_amount)
 
     async def on_raw_reaction_remove(self, payload):
         key = await self.http.get_message(payload.channel_id, payload.message_id)
-        if (payload.emoji.name in worms) and payload.user_id != int(key["author"]["id"]):
+        if (payload.emoji.name in worm_emojis_list) and payload.user_id != int(key["author"]["id"]):
             db.modify_user_balance(payload.user_id, worm_emoji_amount * -1)
 
     async def on_message_edit(self, before, after):

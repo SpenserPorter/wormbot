@@ -166,7 +166,7 @@ class WormFight(commands.Cog):
                       'fields': {1:{'name': self.cock_battle.challenger.name, 'value': "{:.1f}% <:Worm:752975370231218178> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenger_cock_status)*100, 1/self.cock_battle.odds), 'inline': True},
                                  2:{'name': "VS", 'value': '-', 'inline': True},
                                  3:{'name': self.cock_battle.challenged.name, 'value': "{:.1f}% <:Worm:752975370231218178> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenged_cock_status)*100, self.cock_battle.odds), 'inline': True},
-                                 4:{'name': "```{} has 60s to accept the challenge!```".format(self.cock_battle.challenged.name), 'value': 'Use <$challenge_accepted> to accept!', 'inline': False}
+                                 4:{'name': "```{} has 60s to accept the challenge!```".format(self.cock_battle.challenged.name), 'value': 'Use <!challenge_accepted> to accept!', 'inline': False}
                                  }
                       }
 
@@ -177,7 +177,7 @@ class WormFight(commands.Cog):
             await asyncio.sleep(time_to_accept_battle//60)
             wait_cycles += 1
             if wait_cycles in [50, 30, 15]:
-                embed_dict['fields'][4] = {'name': "```{} has {}s to accept the challenge!```".format(self.cock_battle.challenged.name, (time_to_accept_battle/60) * (60 - wait_cycles)), 'value': 'Use <$challenge_accepted> to accept!', 'inline': False}
+                embed_dict['fields'][4] = {'name': "```{} has {}s to accept the challenge!```".format(self.cock_battle.challenged.name, (time_to_accept_battle/60) * (60 - wait_cycles)), 'value': 'Use <!challenge_accepted> to accept!', 'inline': False}
                 await battle_message.edit(embed=build_embed(embed_dict))
 
         if self.cock_battle.accepted:
