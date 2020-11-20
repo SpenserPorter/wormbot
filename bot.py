@@ -122,7 +122,7 @@ class Bot(commands.Bot):
                         print("Assigning {} to {}".format(role_to_assign.name, user.name))
                         await member.add_roles(role_to_assign)
 
-            await asyncio.sleep(15)
+            await asyncio.sleep(60)
 
     async def on_member_join(self, member):
         db.add_user(member.id)

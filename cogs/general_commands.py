@@ -40,6 +40,7 @@ class GeneralCommands(commands.Cog):
                 balances.append((user.name, cock_status, balance))
 
         sorted_balances = sorted(balances, key=lambda balances: balances[2], reverse=True)
+        sorted_balance = sorted_balance[0:9]
         rank = 1
         output = []
 
