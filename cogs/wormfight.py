@@ -163,9 +163,9 @@ class WormFight(commands.Cog):
         self.cock_battle = CockBattle(self.bot, ctx, ctx.author, challenged_user, purse=purse)
 
         embed_dict = {'colour':discord.Colour(0xffa500), 'author_name':"Worm Battle Challenge!",
-                      'fields': {1:{'name': self.cock_battle.challenger.name, 'value': "{:.1f}% <:Worm:779117240087609404> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenger_cock_status)*100, 1/self.cock_battle.odds), 'inline': True},
+                      'fields': {1:{'name': self.cock_battle.challenger.name, 'value': "{:.1f}% <:Worm:752975370231218178> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenger_cock_status)*100, 1/self.cock_battle.odds), 'inline': True},
                                  2:{'name': "VS", 'value': '-', 'inline': True},
-                                 3:{'name': self.cock_battle.challenged.name, 'value': "{:.1f}% <:Worm:779117240087609404> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenged_cock_status)*100, self.cock_battle.odds), 'inline': True},
+                                 3:{'name': self.cock_battle.challenged.name, 'value': "{:.1f}% <:Worm:752975370231218178> @{:.2f}:1 odds".format(get_cock_power(self.cock_battle.challenged_cock_status)*100, self.cock_battle.odds), 'inline': True},
                                  4:{'name': "```{} has 60s to accept the challenge!```".format(self.cock_battle.challenged.name), 'value': 'Use <$challenge_accepted> to accept!', 'inline': False}
                                  }
                       }

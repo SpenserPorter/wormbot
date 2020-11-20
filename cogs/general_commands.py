@@ -44,12 +44,12 @@ class GeneralCommands(commands.Cog):
         output = []
 
         for user_name, cock_status, user_balance in sorted_balances:
-            cock_power = "{:.1f}% <:Worm:779117240087609404>".format((get_cock_power(cock_status) * 100)) if cock_status is not -1 else ":x:"
+            cock_power = "{:.1f}% <:Worm:752975370231218178>".format((get_cock_power(cock_status) * 100)) if cock_status is not -1 else ":x:"
             output.append("{}: **{}** - {:,} - {}".format(rank, user_name, round(user_balance), cock_power))
             rank += 1
 
         embed_dict = {'colour':discord.Colour(0x034cc1), 'author_name':"Worm Hall of Fame",
-                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output[0:9])}}}
+                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output[0:10])}}}
 
         await ctx.send(embed = build_embed(embed_dict))
 
