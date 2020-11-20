@@ -40,7 +40,6 @@ class GeneralCommands(commands.Cog):
                 balances.append((user.name, cock_status, balance))
 
         sorted_balances = sorted(balances, key=lambda balances: balances[2], reverse=True)
-        sorted_balance = sorted_balance[0:9]
         rank = 1
         output = []
 
@@ -50,7 +49,7 @@ class GeneralCommands(commands.Cog):
             rank += 1
 
         embed_dict = {'colour':discord.Colour(0x034cc1), 'author_name':"Worm Hall of Fame",
-                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output)}}}
+                    'fields': {1:{'name': "Leaderboard", 'value': "\n".join(output[0:9])}}}
 
         await ctx.send(embed = build_embed(embed_dict))
 
