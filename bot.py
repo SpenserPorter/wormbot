@@ -106,7 +106,7 @@ class Bot(commands.Bot):
                     balance = db.get_user_balance(user.id)
                     options=[]
                     for key in worm_roles_dict:
-                        if balance < key:
+                        if balance <= key:
                             options.append(key)
                     min_key = min(options)
                     role_name = worm_roles_dict[min_key]
