@@ -11,6 +11,7 @@ from discord.ext import commands
 worms = db.get_config("worm_emojis_list")
 worm_emoji_amount = int(db.get_config("worm_emoji_amount"))
 worm_roles_dict = ast.literal_eval(db.get_config("worm_roles_dict"))
+guild_id = int(db.get_config("guild_id"))
 
 #worm_roles_dict={0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",9999999999999:"Magic Worm™ (5000+)"}
 #worm_roles_dict={0:"test1",100:"test2",999999999999999:"test3"}
@@ -94,6 +95,7 @@ class Bot(commands.Bot):
             db.add_user(user.id)
 
     async def update_worm_roles(self):
+        await asyncio.sleep(15)
         while True:
             user_list = db.get_user()
             balances = []
@@ -108,7 +110,7 @@ class Bot(commands.Bot):
                             options.append(key)
                     min_key = min(options)
                     role_name = worm_roles_dict[min_key]
-                    guild = self.get_guild(459332259321741323)
+                    guild = self.get_guild(guild_id)
                     member = guild.get_member(user.id)
                     current_roles = member.roles
                     role_to_assign = discord.utils.get(member.guild.roles, name=role_name)
@@ -120,7 +122,7 @@ class Bot(commands.Bot):
                         print("Assigning {} to {}".format(role_to_assign.name, user.name))
                         await member.add_roles(role_to_assign)
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(15)
 
     async def on_member_join(self, member):
         db.add_user(member.id)
