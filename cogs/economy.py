@@ -27,7 +27,7 @@ class Economy(commands.Cog):
         self.bot = bot
 
     @commands.group()
-    @commands.cooldown(1, 864000, commands.BucketType.user)
+    @commands.cooldown(1, 86400, commands.BucketType.user)
     async def daily(self, ctx):
         "Does your daily check in - works every 24 hours"
         db.modify_user_balance(ctx.author.id, int(db.get_config("daily_worms")))
@@ -38,7 +38,7 @@ class Economy(commands.Cog):
     @daily.error
     async def daily_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            msg = 'You already did your check in, please try again in %s Hours and %s Minute'%(error.retry_after//36000,error.retry_after % 3600 //60)
+            msg = 'You already did your check in, please try again in %s Hours and %s Minute'%(error.retry_after//3600, error.retry_after % 3600 //60)
             await ctx.send(msg)
         else:
             raise error

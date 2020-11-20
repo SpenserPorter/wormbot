@@ -7,7 +7,7 @@ class LottoryConnection(object):
         self.port=5432
         self.username="spenser"
         self.password="lolwut"
-        self.dbname="wormbot_test"
+        self.dbname="wormbot"
 
 
     def __enter__(self):

@@ -15,10 +15,6 @@ guild_id = int(db.get_config("guild_id"))
 worm_god_id = int(db.get_config("worm_god_id"))
 default_channel = int(db.get_config("default_channel"))
 
-#worm_roles_dict={0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",9999999999999:"Magic Worm™ (5000+)"}
-#################{0:"Dead Worm (0 Worms)", 500: "Flat Worm (1-500) Worms", 1000: "Silly Worm™ (501-1000)", 2000:"Magic Wigglee™ (1001-2000)", 3000: "Wiggle Worm™ (2001-3000) Worms",4000:"Wacky Worm™ (3001-4000) Worms", 5000:"Tricky Worm™ (4001-5000)",99999999999999:"Magic Worm™ (5000+)"}
-#worm_roles_dict={0:"test1",100:"test2","max":"god"}
-
 
 async def run():
     """
@@ -26,7 +22,7 @@ async def run():
     it's recommended that you create it here and pass it to the bot as a kwarg.
     """
     bot = Bot(description='Get ya worms here!')
-    token = os.getenv('WORM_BOT_TOKEN')
+    token = os.getenv('WORM_TEST_TOKEN')
     try:
         await bot.start(token)
     except KeyboardInterrupt:
@@ -122,15 +118,18 @@ class Bot(commands.Bot):
                         options.append(threshold)
                 min_threshold = min(options)
                 role_to_assign = role_object_dict[min_threshold]
-                member = guild.get_member(user_id)
-                current_roles = member.roles
-                if role_to_assign not in member.roles:
-                    for role in current_roles:
-                        if role in role_object_dict.values():
-                            await member.remove_roles(role)
-                            print("Removing {} from {}".format(role, member.name))
-                    print("Assigning {} to {}".format(role_to_assign, member.name))
-                    await member.add_roles(role_to_assign)
+                try:
+                    member = guild.get_member(user_id)
+                    current_roles = member.roles
+                    if role_to_assign not in member.roles:
+                        for role in current_roles:
+                            if role in role_object_dict.values():
+                                await member.remove_roles(role)
+                                print("Removing {} from {}".format(role, member.name))
+                        print("Assigning {} to {}".format(role_to_assign, member.name))
+                        await member.add_roles(role_to_assign)
+                except:
+                    print("Failed to assign role {} for user {}".format(role_to_assign, user_id))
 
             god_role_object = discord.utils.get(guild.roles, id=worm_god_id)
             sorted_balances = sorted(balances, key=lambda balances: balances[1], reverse=True)
@@ -154,7 +153,6 @@ class Bot(commands.Bot):
                             channel = guild.get_channel(default_channel)
                             await channel.send(message)
                 await new_god.add_roles(god_role_object)
-
 
             await asyncio.sleep(60)
 
