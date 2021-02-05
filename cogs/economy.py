@@ -46,7 +46,7 @@ class Economy(commands.Cog):
 
 
     @commands.group(invoke_without_command=True)
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 36000, commands.BucketType.user)
     async def steal(self, ctx, target, amount: int):
         '''Try to steal worms from another user,
             but be careful it may backfire! The more worms
