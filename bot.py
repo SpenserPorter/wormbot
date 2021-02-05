@@ -22,7 +22,7 @@ async def run():
     it's recommended that you create it here and pass it to the bot as a kwarg.
     """
     bot = Bot(description='Get ya worms here!')
-    token = os.getenv('WORM_TEST_TOKEN')
+    token = os.getenv('WORM_BOT_TOKEN')
     try:
         await bot.start(token)
     except KeyboardInterrupt:
