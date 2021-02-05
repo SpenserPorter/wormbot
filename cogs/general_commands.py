@@ -70,14 +70,15 @@ class GeneralCommands(commands.Cog):
                 await ctx.send('Added {:,} worms to {}\'s account. New balance is {:,}'.format(amount, user.name, new_balance))
 
     @commands.group(invoke_without_command=True, aliases=["bal","balance","worm"])
-    async def worms(self,ctx):
-        '''Shows your worm balance and number of tickets in next lottery'''
-
-        user = message.mentions[0]
-        balance = db.get_user_balance(ctx.author.id)
-        lottory_id = db.get_current_lottory()
-        ticket_list = db.get_user_tickets(ctx.author.id,lottory_id)
-        await ctx.send("{} has {:,} worms and {} tickets for the next lottery".format(ctx.author.name, round(balance,2), len(ticket_list)))
+    async def worms(self,ctx, user: discord.Member = None):
+        '''Shows your worm balance of yourself or another user'''
+        if user:
+            balance = db.get_user_balance(user.id)
+            name = user.mention
+        else:
+            balance = db.get_user_balance(ctx.author.id)
+            name = ctx.author.mention
+        await ctx.send("{} has {:,} worms".format(name, round(balance,2)))
 
 def setup(bot):
     bot.add_cog(GeneralCommands(bot))
