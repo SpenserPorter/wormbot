@@ -8,7 +8,7 @@ import discord
 import lotto_dao as db
 from discord.ext import commands
 
-worm_emojis_list = db.get_config("worm_emojis_list")
+worm_emojis_list = ast.literal_eval(db.get_config("worm_emojis_list"))
 worm_emoji_amount = int(db.get_config("worm_emoji_amount"))
 worm_roles_dict = ast.literal_eval(db.get_config("worm_roles_dict"))
 guild_id = int(db.get_config("guild_id"))
@@ -22,7 +22,7 @@ async def run():
     it's recommended that you create it here and pass it to the bot as a kwarg.
     """
     bot = Bot(description='Get ya worms here!')
-    token = os.getenv('WORM_BOT_TOKEN')
+    token = os.getenv('WORM_TEST_TOKEN')
     try:
         await bot.start(token)
     except KeyboardInterrupt:
@@ -184,7 +184,6 @@ class Bot(commands.Bot):
     async def on_message(self, message):
         '''Prevent rigged accusations with extreme predjustice'''
         channel = message.channel
-        print(message.author, message.author.id, message.content)
         if message.author.bot:
             return
         check_rigged = message.content.lower()

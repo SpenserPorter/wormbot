@@ -7,7 +7,7 @@ class LottoryConnection(object):
         self.port=5432
         self.username="spenser"
         self.password="lolwut"
-        self.dbname="wormbot"
+        self.dbname="wormbot_test"
 
 
     def __enter__(self):
@@ -188,6 +188,28 @@ def set_cock_status(user_id, status):
         set_cock_sql = 'update member SET cock={} WHERE user_id={};'.format(status, user_id)
         curr.execute(set_cock_sql)
         conn.commit()
+
+def get_steal_status(user_id=None):
+    with LottoryConnection() as conn:
+        curr = conn.cursor()
+        user_sql = '' if user_id is None else 'WHERE user_id={}'.format(user_id)
+        get_cock_sql = 'SELECT steal FROM member {} ORDER BY steal DESC;'.format(user_sql)
+        curr.execute(get_cock_sql)
+        if user_id is None:
+            return curr.fetchall()
+        else:
+            return curr.fetchone()[0]
+
+def get_skill(skill_name):
+    with LottoryConnection() as conn:
+        curr = conn.cursor()
+        user_sql = '' if skill_name is None else 'WHERE name={}'.format(skill_name)
+        sql = 'SELECT * FROM skill {} ORDER BY cost ASC;'.format(user_sql)
+        curr.execute(get_cock_sql)
+        if skill_name is None:
+            return curr.fetchall()
+        else:
+            return curr.fetchone()
 
 def get_config(param):
     with LottoryConnection() as conn:

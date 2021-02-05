@@ -4,6 +4,7 @@ import asyncio
 import re
 import ast
 import random
+import math
 from discord.ext import commands
 
 thumb_gif_list = ast.literal_eval(db.get_config("thumb_gifs"))
@@ -43,9 +44,69 @@ class Economy(commands.Cog):
         else:
             raise error
 
+
     @commands.group(invoke_without_command=True)
-    async def steal(self,ctx):
-        await ctx.send("You haven't learned that skill yet!")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def steal(self, ctx, target, amount: int):
+        '''Try to steal worms from another user,
+            but be careful it may backfire! The more worms
+            you attempt to steal, the less likely it is to succeed'''
+        try:
+            target = ctx.message.mentions[0]
+        except:
+            await ctx.send("No valid user found!")
+            await ctx.command.reset_cooldown(ctx)
+            return
+        target_balance = db.get_user_balance(target.id)
+        user_balance = db.get_user_balance(ctx.author.id)
+        if amount < 10:
+            await ctx.send("You have to steal at least 10 worms!")
+            await ctx.command.reset_cooldown(ctx)
+            return
+        if target_balance < 100:
+            await ctx.send("{} is too poor to steal from, find another target!".format(target.mention))
+            await ctx.command.reset_cooldown(ctx)
+            return
+        if amount > target_balance:
+            await ctx.send("{} only has {} worms, so I guess you're trying to steal all of them".format(target.mention, target_balance))
+            amount = target_balance
+
+        base_difficulty = 10
+        ratio = round(amount / target_balance, 2)
+        total_difficulty = math.ceil(base_difficulty + (10 * ratio))
+        result = random.randint(1,20)
+        await ctx.send("Attempting to steal {}% of {} worms, you'll need to roll {} or better!".format(ratio * 100, target.mention, total_difficulty))
+        gif_message = await ctx.send('https://tenor.com/ba6fL.gif')
+        await asyncio.sleep(5)
+        if result >= total_difficulty:
+            db.modify_user_balance(target.id, -1 * amount)
+            db.modify_user_balance(ctx.author.id, amount)
+            await ctx.send("{} rolled a {} and successfully stole {} worms from {}".format(ctx.author.mention, result, amount, target.mention))
+            await gif_message.edit(content="https://tenor.com/bmxN5.gif")
+            ctx.command.reset_cooldown(ctx)
+        elif 1 < result < 6:
+            backfire_percent = random.uniform(.1,.5)
+            backfire_amount = round(user_balance * backfire_percent)
+            await ctx.send("{} rolled a {}, got caught by the police and were forced to pay {} {} worms instead".format(ctx.author.mention, result, target.mention, backfire_amount))
+            db.modify_user_balance(target.id, backfire_amount)
+            db.modify_user_balance(ctx.author.id, -1 * backfire_amount)
+            await gif_message.edit(content="https://tenor.com/bia0L.gif")
+        elif result == 1:
+            await ctx.send("{} rolled a {}, now all their worms are belong to {}".format(ctx.author.mention, result, target.mention))
+            db.modify_user_balance(ctx.author.id, -1 * user_balance)
+            db.modify_user_balance(target.id, user_balance)
+            await gif_message.edit(content="https://tenor.com/btHVc.gif")
+        else:
+            await ctx.send("{} rolled a {}, nothing happened!".format(ctx.author.mention, result))
+            await gif_message.edit(content="https://tenor.com/6ziX.gif")
+
+    @steal.error
+    async def steal_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            msg = "You need to wait at least {} hours and {} minutes since your last failed steal to try again!".format(error.retry_after//3600, error.retry_after % 3600 //60)
+            await ctx.send(msg)
+        else:
+            raise error
 
     @commands.group(invoke_without_command=True)
     async def give(self,ctx,who,value):

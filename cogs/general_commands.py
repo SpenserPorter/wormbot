@@ -73,6 +73,7 @@ class GeneralCommands(commands.Cog):
     async def worms(self,ctx):
         '''Shows your worm balance and number of tickets in next lottery'''
 
+        user = message.mentions[0]
         balance = db.get_user_balance(ctx.author.id)
         lottory_id = db.get_current_lottory()
         ticket_list = db.get_user_tickets(ctx.author.id,lottory_id)
